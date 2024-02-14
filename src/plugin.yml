@@ -1,0 +1,10 @@
+name: SMPUtils
+main: de.terrarier.smp.Smp
+version: 1.0
+
+commands:
+  location:
+    aliases:
+      - loc
+      - wp
+      - waypoint
