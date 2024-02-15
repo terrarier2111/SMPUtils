@@ -1,6 +1,7 @@
 package de.terrarier.smp;
 
 import de.terrarier.smp.commands.CommandLocation;
+import de.terrarier.smp.listeners.ListenerCrops;
 import de.terrarier.smp.listeners.ListenerDeath;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -28,16 +29,19 @@ public final class Smp extends JavaPlugin {
             this.globalLocs.put(loc.getName().split(".")[0], getLocation(loc));
         }
         File playersDirs = new File("./smp/locs/own/");
-        for (File player : playersDirs.listFiles()) {
-            HashMap<String, Location> locs = new HashMap<>();
-            for (File loc : player.listFiles()) {
-                locs.put(loc.getName().split(".")[0], getLocation(loc));
+        if (playersDirs.exists()) {
+            for (File player : playersDirs.listFiles()) {
+                HashMap<String, Location> locs = new HashMap<>();
+                for (File loc : player.listFiles()) {
+                    locs.put(loc.getName().split(".")[0], getLocation(loc));
+                }
+                ownedLocs.put(UUID.fromString(player.getName()), locs);
             }
-            ownedLocs.put(UUID.fromString(player.getName()), locs);
         }
 
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new ListenerDeath(), this);
+        pm.registerEvents(new ListenerCrops(), this);
         getCommand("location").setExecutor(new CommandLocation(this));
     }
 
