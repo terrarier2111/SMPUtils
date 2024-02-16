@@ -3,6 +3,7 @@ package de.terrarier.smp;
 import de.terrarier.smp.commands.CommandLocation;
 import de.terrarier.smp.listeners.ListenerCrops;
 import de.terrarier.smp.listeners.ListenerDeath;
+import de.terrarier.smp.listeners.ListenerSit;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,20 +21,22 @@ public final class Smp extends JavaPlugin {
     public HashMap<UUID, HashMap<String, Location>> ownedLocs = new HashMap<>();
     public HashMap<String, Location> globalLocs = new HashMap<>();
 
+    // FIXME: implement combat logging system and afk system (automatic protection when player goes afk)
+
     @Override
     public void onEnable() {
         // initialize locations
-        File globalLocs = new File("./smp/locs/global/");
+        File globalLocs = new File("./plugins/smp/locs/global/");
         globalLocs.mkdirs();
         for (File loc : globalLocs.listFiles()) {
-            this.globalLocs.put(loc.getName().split(".")[0], getLocation(loc));
+            this.globalLocs.put(loc.getName().split("\\.")[0], getLocation(loc));
         }
-        File playersDirs = new File("./smp/locs/own/");
+        File playersDirs = new File("./plugins/smp/locs/own/");
         if (playersDirs.exists()) {
             for (File player : playersDirs.listFiles()) {
                 HashMap<String, Location> locs = new HashMap<>();
                 for (File loc : player.listFiles()) {
-                    locs.put(loc.getName().split(".")[0], getLocation(loc));
+                    locs.put(loc.getName().split("\\.")[0], getLocation(loc));
                 }
                 ownedLocs.put(UUID.fromString(player.getName()), locs);
             }
@@ -41,7 +44,8 @@ public final class Smp extends JavaPlugin {
 
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new ListenerDeath(), this);
-        pm.registerEvents(new ListenerCrops(), this);
+        pm.registerEvents(new ListenerCrops(this), this);
+        pm.registerEvents(new ListenerSit(this), this);
         getCommand("location").setExecutor(new CommandLocation(this));
     }
 

@@ -14,6 +14,9 @@ import java.util.Map;
 
 public final class CommandLocation implements CommandExecutor {
 
+    private static final String OWN_PREFIX = "§7[Own] ";
+    private static final String GLOBAL_PREFIX = "§7[Global] ";
+
     private final Smp instance;
 
     public CommandLocation(Smp instance) {
@@ -50,29 +53,35 @@ public final class CommandLocation implements CommandExecutor {
                     }
                     player.sendMessage("§7Locations (" + locations + "):");
                     for (Map.Entry<String, Location> loc : instance.globalLocs.entrySet()) {
-                        player.sendMessage("§7[GLOBAL] \"§6" + loc.getKey() + "§7\": §6" + loc.getValue().getBlockX() + "§7, §6" + loc.getValue().getBlockY() + "§7, §6" + loc.getValue().getBlockZ() + " §7in \"§6" + loc.getValue().getWorld().getName() + "§7\"");
+                        player.sendMessage(GLOBAL_PREFIX + "\"§6" + loc.getKey() + "§7\": §6" + loc.getValue().getBlockX() + "§7, §6" + loc.getValue().getBlockY() + "§7, §6" + loc.getValue().getBlockZ() + " §7in \"§6" + loc.getValue().getWorld().getName() + "§7\"");
                     }
-                    for (Map.Entry<String, Location> loc : ownLocs.entrySet()) {
-                        player.sendMessage("§7[OWN] \"§6" + loc.getKey() + "§7\": §6" + loc.getValue().getBlockX() + "§7, §6" + loc.getValue().getBlockY() + "§7, §6" + loc.getValue().getBlockZ() + " §7in \"§6" + loc.getValue().getWorld().getName() + "§7\"");
+                    if (ownLocs != null) {
+                        for (Map.Entry<String, Location> loc : ownLocs.entrySet()) {
+                            player.sendMessage(OWN_PREFIX + "\"§6" + loc.getKey() + "§7\": §6" + loc.getValue().getBlockX() + "§7, §6" + loc.getValue().getBlockY() + "§7, §6" + loc.getValue().getBlockZ() + " §7in \"§6" + loc.getValue().getWorld().getName() + "§7\"");
+                        }
                     }
                     return true;
                 }
                 switch (args[1].toLowerCase()) {
                     case "global":
-                        player.sendMessage("§7Locations (" + instance.globalLocs.size() + "):");
+                        if (instance.globalLocs.isEmpty()) {
+                            player.sendMessage(GLOBAL_PREFIX + "§cThere are no global locations yet");
+                            return true;
+                        }
+                        player.sendMessage(GLOBAL_PREFIX + "§7Locations (" + instance.globalLocs.size() + "):");
                         for (Map.Entry<String, Location> loc : instance.globalLocs.entrySet()) {
-                            player.sendMessage("§7[GLOBAL] \"§6" + loc.getKey() + "§7\": §6" + loc.getValue().getBlockX() + "§7, §6" + loc.getValue().getBlockY() + "§7, §6" + loc.getValue().getBlockZ() + " §7in \"§6" + loc.getValue().getWorld().getName() + "§7\"");
+                            player.sendMessage(GLOBAL_PREFIX + "\"§6" + loc.getKey() + "§7\": §6" + loc.getValue().getBlockX() + "§7, §6" + loc.getValue().getBlockY() + "§7, §6" + loc.getValue().getBlockZ() + " §7in \"§6" + loc.getValue().getWorld().getName() + "§7\"");
                         }
                         break;
                     case "own":
                         HashMap<String, Location> ownLocs = instance.ownedLocs.get(player.getUniqueId());
                         if (ownLocs == null) {
-                            player.sendMessage("§cYou have not yet set any own locations");
+                            player.sendMessage(OWN_PREFIX + "§cYou have not yet set any own locations");
                             return true;
                         }
-                        player.sendMessage("§7Locations (" + ownLocs.size() + "):");
+                        player.sendMessage(OWN_PREFIX + "§7Locations (" + ownLocs.size() + "):");
                         for (Map.Entry<String, Location> loc : ownLocs.entrySet()) {
-                            player.sendMessage("§7[OWN] \"§6" + loc.getKey() + "§7\": §6" + loc.getValue().getBlockX() + "§7, §6" + loc.getValue().getBlockY() + "§7, §6" + loc.getValue().getBlockZ() + " §7in \"§6" + loc.getValue().getWorld().getName() + "§7\"");
+                            player.sendMessage(OWN_PREFIX + "\"§6" + loc.getKey() + "§7\": §6" + loc.getValue().getBlockX() + "§7, §6" + loc.getValue().getBlockY() + "§7, §6" + loc.getValue().getBlockZ() + " §7in \"§6" + loc.getValue().getWorld().getName() + "§7\"");
                         }
                         break;
                     default:
@@ -89,25 +98,27 @@ public final class CommandLocation implements CommandExecutor {
                 switch (args[2].toLowerCase()) {
                     case "global":
                         try {
-                            File file = new File("./smp/locs/global/" + locName + ".yml");
+                            File file = new File("./plugins/smp/locs/global/" + locName + ".yml");
                             if (!file.exists()) {
                                 file.createNewFile();
                             }
                             Smp.setLocation(file, player.getLocation());
-                            player.sendMessage("§7[GLOBAL] §aSuccessfully set \"" + args[1] + "\" to your current location");
+                            instance.globalLocs.put(locName, player.getLocation());
+                            player.sendMessage(GLOBAL_PREFIX + "§aSuccessfully set \"" + args[1] + "\" to your current location");
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                         break;
                     case "own":
-                        new File("./smp/locs/own/" + player.getUniqueId().toString()).mkdirs();
+                        new File("./plugins/smp/locs/own/" + player.getUniqueId().toString()).mkdirs();
                         try {
-                            File file = new File("./smp/locs/own/" + player.getUniqueId().toString() + "/" + locName + ".yml");
+                            File file = new File("./plugins/smp/locs/own/" + player.getUniqueId().toString() + "/" + locName + ".yml");
                             if (!file.exists()) {
                                 file.createNewFile();
                             }
                             Smp.setLocation(file, player.getLocation());
-                            player.sendMessage("§7[OWN] §aSuccessfully set \"" + args[1] + "\" to your current location");
+                            instance.ownedLocs.getOrDefault(player.getUniqueId(), new HashMap<>()).put(locName, player.getLocation());
+                            player.sendMessage(OWN_PREFIX + "§aSuccessfully set \"" + args[1] + "\" to your current location");
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -128,24 +139,24 @@ public final class CommandLocation implements CommandExecutor {
                 switch (args[2].toLowerCase()) {
                     case "global":
                         if (instance.globalLocs.remove(locName2) == null) {
-                            player.sendMessage("§cThere is no global location called \"§7" + args[1] + "§c\"");
+                            player.sendMessage(GLOBAL_PREFIX + "§cThere is no global location called \"§7" + args[1] + "§c\"");
                             return false;
                         }
-                        new File("./smp/locs/global/" + locName2 + ".yml").delete();
-                        player.sendMessage("§7[GLOBAL] §aSuccessfully deleted location \"" + locName2 + "\"");
+                        new File("./plugins/smp/locs/global/" + locName2 + ".yml").delete();
+                        player.sendMessage(GLOBAL_PREFIX + "§aSuccessfully deleted location \"" + locName2 + "\"");
                         break;
                     case "own":
                         HashMap<String, Location> ownLocs = instance.ownedLocs.get(player.getUniqueId());
                         if (ownLocs == null) {
-                            player.sendMessage("§cYou don't have any own locations");
+                            player.sendMessage(OWN_PREFIX + "§cYou don't have any own locations");
                             return true;
                         }
                         if (ownLocs.remove(locName2) == null) {
-                            player.sendMessage("§cYou don't have a location called \"§7" + args[1] + "§c\"");
+                            player.sendMessage(OWN_PREFIX + "§cYou don't have a location called \"§7" + args[1] + "§c\"");
                             return true;
                         }
-                        new File("./smp/locs/own/" + player.getUniqueId() + "/" + locName2 + ".yml").delete();
-                        player.sendMessage("§7[OWN] §aSuccessfully deleted location \"" + args[1] + "\"");
+                        new File("./plugins/smp/locs/own/" + player.getUniqueId() + "/" + locName2 + ".yml").delete();
+                        player.sendMessage(OWN_PREFIX + "§aSuccessfully deleted location \"" + args[1] + "\"");
                         break;
                     default:
                         sendUsage(sender, rawCmd);
