@@ -1,14 +1,20 @@
 package de.terrarier.smp.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class ListenerCrops implements Listener {
+
+    private final JavaPlugin instance;
+
+    public ListenerCrops(JavaPlugin instance) {
+        this.instance = instance;
+    }
 
     @EventHandler
     public void onCrop(BlockBreakEvent ev) {
@@ -20,7 +26,7 @@ public class ListenerCrops implements Listener {
                     // ev.getBlock().setData((byte) 0);
                     Material prev = ev.getBlock().getType();
                     ev.getBlock().setType(Material.AIR);
-                    ev.getBlock().setType(prev);
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(instance, () -> ev.getBlock().setType(prev), 1L);
                     item.setAmount(item.getAmount() - 1);
                     if (item.getAmount() == 0) {
                         item.setType(Material.AIR);
