@@ -17,7 +17,7 @@ public final class ListenerDeath implements Listener {
     public void onDeath(PlayerDeathEvent ev) {
         // send death coords
         Location location = ev.getEntity().getLocation();
-        ev.getEntity().sendMessage("§6cYou died at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + " in the world \"" + location.getWorld().getName() + "\"");
+        ev.getEntity().sendMessage("§6You died at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ() + " in the world \"" + location.getWorld().getName() + "\"");
 
         // drop player head
         ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
