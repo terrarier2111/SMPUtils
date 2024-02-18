@@ -6,5 +6,6 @@ commands:
   location:
     aliases:
       - loc
+      - pos
       - wp
       - waypoint
