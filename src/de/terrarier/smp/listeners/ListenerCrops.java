@@ -25,8 +25,11 @@ public class ListenerCrops implements Listener {
 
     @EventHandler
     public void onCrop(PlayerInteractEvent ev) {
-        if (ev.getAction() == Action.RIGHT_CLICK_BLOCK && ev.getClickedBlock() != null && (ev.getClickedBlock().getType() == Material.POTATO || ev.getClickedBlock().getType() == Material.CARROT || ev.getClickedBlock().getType() == Material.CROPS || ev.getClickedBlock().getType().name().equals("BEETROOT_BLOCK"))
-                && (ev.getPlayer().getItemInHand() == null || ev.getPlayer().getItemInHand().getType() == Material.AIR) && ((Crops) ev.getClickedBlock().getState().getData()).getState() == CropState.RIPE) {
+        ItemStack hand = ev.getPlayer().getItemInHand();
+        if (ev.getAction() == Action.RIGHT_CLICK_BLOCK && ev.getClickedBlock() != null &&
+                (ev.getClickedBlock().getType() == Material.POTATO || ev.getClickedBlock().getType() == Material.CARROT || ev.getClickedBlock().getType() == Material.CROPS || ev.getClickedBlock().getType().name().equals("BEETROOT_BLOCK"))
+                && (hand == null || hand.getType() == Material.AIR || hand.getType() == Material.SEEDS || hand.getType() == Material.WHEAT || hand.getType() == Material.CARROT_ITEM || hand.getType() == Material.POTATO_ITEM || hand.getType() == Material.POISONOUS_POTATO)
+                && ((Crops) ev.getClickedBlock().getState().getData()).getState() == CropState.RIPE) {
             for (ItemStack item : ev.getClickedBlock().getDrops()) {
                 if (item.getType() == Material.SEEDS || item.getType() == Material.CARROT_ITEM || item.getType() == Material.POTATO_ITEM) {
                     item.setAmount(item.getAmount() - 1);
