@@ -164,6 +164,54 @@ public final class CommandLocation implements CommandExecutor {
                 }
 
                 break;
+            case "follow":
+                if (args.length != 3) {
+                    sendUsage(sender, rawCmd);
+                    return false;
+                }
+
+                String locName3 = args[1].toLowerCase();
+
+                switch (args[2].toLowerCase()) {
+                    case "global":
+                        Location loc1 = instance.globalLocs.get(locName3);
+                        if (loc1 == null) {
+                            player.sendMessage(GLOBAL_PREFIX + "§cThere is no global location called \"§7" + args[1] + "§c\"");
+                            return false;
+                        }
+                        instance.follow.put(player.getUniqueId(), loc1);
+                        player.sendMessage("§aFollowing " + locName3);
+                        break;
+                    case "own":
+                        HashMap<String, Location> ownLocs = instance.ownedLocs.get(player.getUniqueId());
+                        if (ownLocs == null) {
+                            player.sendMessage(OWN_PREFIX + "§cYou don't have any own locations");
+                            return true;
+                        }
+                        Location loc2 = ownLocs.get(locName3);
+                        if (loc2 == null) {
+                            player.sendMessage(OWN_PREFIX + "§cYou don't have a location called \"§7" + args[1] + "§c\"");
+                            return true;
+                        }
+                        instance.follow.put(player.getUniqueId(), loc2);
+                        player.sendMessage("§aFollowing " + locName3);
+                        break;
+                    default:
+                        sendUsage(sender, rawCmd);
+                        break;
+                }
+            case "unfollow":
+                if (args.length != 1) {
+                    sendUsage(sender, rawCmd);
+                    return false;
+                }
+                boolean hadLoc = instance.follow.remove(player.getUniqueId()) != null;
+                if (hadLoc) {
+                    player.sendMessage("§aUnfollowed location");
+                } else {
+                    player.sendMessage("§cThere is no location to unfollow");
+                }
+                break;
             default:
 
                 break;
@@ -177,6 +225,8 @@ public final class CommandLocation implements CommandExecutor {
         sender.sendMessage("§c/" + cmd + " set [name] <own, global> | set a specific location");
         sender.sendMessage("§c/" + cmd + " remove [name] <own, global> | delete the specific location");
         sender.sendMessage("§c/" + cmd + " [name] <own, global> | get the coords of the specific location");
+        sender.sendMessage("§c/" + cmd + " follow [name] <own, global> | follow a specific location");
+        sender.sendMessage("§c/" + cmd + " unfollow | stop following a location");
     }
 
 }
