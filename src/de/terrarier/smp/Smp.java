@@ -3,6 +3,7 @@ package de.terrarier.smp;
 import de.terrarier.smp.commands.CommandLocation;
 import de.terrarier.smp.listeners.ListenerCrops;
 import de.terrarier.smp.listeners.ListenerDeath;
+import de.terrarier.smp.listeners.ListenerMobGrief;
 import de.terrarier.smp.listeners.ListenerSit;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -64,6 +65,9 @@ public final class Smp extends JavaPlugin {
         pm.registerEvents(new ListenerDeath(), this);
         pm.registerEvents(new ListenerCrops(this), this);
         pm.registerEvents(new ListenerSit(this), this);
+        // this module disables the most annoying parts about mob griefing while still allowing
+        // for things like villager breeding which the game rule for mob griefing disables as well
+        pm.registerEvents(new ListenerMobGrief(), this);
         getCommand("location").setExecutor(new CommandLocation(this));
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
